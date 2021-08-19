@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class ScraperService {
      * @param seed
      */
     private void scrape(String seed) {
+        Instant now = Instant.now();
         openUrlAndConfirmCookiesPolicy();
         driver.findElement(By.name("search_query")).click();
 
@@ -90,7 +92,7 @@ public class ScraperService {
         ytdThumbnail.click();
 
         for (int i = 0; i < 10000; i++) {
-            commonExtractData(i);
+            commonExtractData(i + 1, now, seed);
         }
 
 
@@ -132,7 +134,7 @@ public class ScraperService {
     /**
      *
      */
-    private void commonExtractData(int iteration) {
+    private void commonExtractData(int iteration, Instant now, String seed) {
         {
             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[2]/div/div[3]/ytd-watch-next-secondary-results-renderer/div[2]/ytd-compact-video-renderer"), 1));
 
@@ -141,11 +143,13 @@ public class ScraperService {
             for (WebElement webElement : ytdCompactVideoRenderer) {
                 try {
                     Suggestion suggestion = new Suggestion();
+                    suggestion.setIdExp(now.toString());
                     WebElement thumbnail = webElement.findElement(By.id("thumbnail"));
                     String href = thumbnail.getAttribute("href");
                     suggestion.setHref(thumbnail.getAttribute("href"));
-                    suggestion.setIdExp(href.split("v=")[1]);
+                    suggestion.setVideoId(href.split("v=")[1]);
                     suggestion.setIterNumber(iteration);
+                    suggestion.setSeed(seed);
                     this.send(suggestion);
                 } catch (Exception e) {
                     log.error(e.getMessage());

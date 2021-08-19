@@ -22,6 +22,7 @@ public class Suggestion implements Serializable {
 
     private String href;
     private String idExp;// identifiant unique pour chaque video
+    private String videoId;
     private int iterNumber; // itertation number
     private String seed; //mot cle utlisé
     private String channelId;

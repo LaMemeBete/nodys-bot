@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,29 +36,41 @@ public class KafkaConsumer {
     public void processMessage(String content) {
         try {
             Suggestion suggestion = mapper.readValue(content, Suggestion.class);
-            VideoListResponse videoDetail = apiYouTube.getVideoDetail(suggestion.getIdExp());
-            VideoSnippet snippet = videoDetail.getItems().get(0).getSnippet();
-            suggestion.setPublishedAt(snippet.getPublishedAt());
-            suggestion.setChannelTitle(snippet.getChannelTitle());
-            suggestion.setDescription(snippet.getDescription());
-            suggestion.setDefaultLanguage(snippet.getDefaultLanguage());
-            suggestion.setChannelTitle(snippet.getChannelTitle());
-            VideoContentDetails contentDetails = videoDetail.getItems().get(0).getContentDetails();
-            suggestion.setDuration(contentDetails.getDuration());
-            VideoStatistics statistics = videoDetail.getItems().get(0).getStatistics();
-            suggestion.setCommentCount(statistics.getCommentCount());
-            suggestion.setDislikeCount(statistics.getDislikeCount());
-            suggestion.setFavoriteCount(statistics.getFavoriteCount());
-            suggestion.setLikeCount(statistics.getLikeCount());
-            suggestion.setViewCount(statistics.getViewCount());
-            CommentThreadListResponse comments = apiYouTube.getVideoComments(suggestion.getIdExp());
-            if (comments != null && comments.getItems() != null && comments.getItems().size() > 0) {
-                List<String> listComments = comments.getItems().stream().map(ss -> ss.getSnippet().getTopLevelComment().getSnippet().getTextDisplay()).limit(10).collect(Collectors.toList());
-                suggestion.setListComments(listComments);
+            if(suggestion.getVideoId()!=null){
+                VideoListResponse videoDetail = apiYouTube.getVideoDetail(suggestion.getVideoId());
+                VideoSnippet snippet = videoDetail.getItems().get(0).getSnippet();
+                suggestion.setPublishedAt(snippet.getPublishedAt());
+                suggestion.setChannelTitle(snippet.getChannelTitle());
+                suggestion.setDescription(snippet.getDescription());
+                suggestion.setDefaultLanguage(snippet.getDefaultLanguage());
+                suggestion.setChannelTitle(snippet.getChannelTitle());
+                VideoContentDetails contentDetails = videoDetail.getItems().get(0).getContentDetails();
+                suggestion.setDuration(contentDetails.getDuration());
+                VideoStatistics statistics = videoDetail.getItems().get(0).getStatistics();
+                suggestion.setCommentCount(statistics.getCommentCount());
+                suggestion.setDislikeCount(statistics.getDislikeCount());
+                suggestion.setFavoriteCount(statistics.getFavoriteCount());
+                suggestion.setLikeCount(statistics.getLikeCount());
+                suggestion.setViewCount(statistics.getViewCount());
+                CommentThreadListResponse comments = apiYouTube.getVideoComments(suggestion.getIdExp());
+                List<CommentThread> listItems = comments.getItems();
+                if (comments != null && comments.getItems() != null && comments.getItems().size() > 0) {
+                    List<String> listComments = new ArrayList<>();
+                    for (CommentThread commentThread :listItems ) {
+                        List<Comment> list = commentThread.getReplies().getComments();
+                        for (Comment comment :list ) {
+                            listComments.add(comment.getSnippet().getTextOriginal());
+                        }
+
+                    }
+                  //  List<String> listComments = comments.getItems().stream().map(comment -> comment.getSnippet().getTopLevelComment().getSnippet().getTextOriginal()).collect(Collectors.toList());
+                    suggestion.setListComments(listComments);
+                }
+                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                String json = ow.writeValueAsString(suggestion);
+                kafkaProducer.send(kafkaTopic, json);
             }
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(suggestion);
-            kafkaProducer.send(kafkaTopic, json);
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }
