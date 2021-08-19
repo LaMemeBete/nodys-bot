@@ -2,6 +2,7 @@ package com.nodys.botscraper;
 
 import com.nodys.botscraper.service.scraper.youtube.ScraperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +12,8 @@ public class BotScraperApplication implements CommandLineRunner {
 
     @Autowired
     ScraperService scraperService;
+    @Value("${seed}")
+    private String seed;
 
     public static void main(String[] args) {
         SpringApplication.run(BotScraperApplication.class, args);
@@ -18,6 +21,6 @@ public class BotScraperApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        scraperService.run();
+        scraperService.run(seed);
     }
 }

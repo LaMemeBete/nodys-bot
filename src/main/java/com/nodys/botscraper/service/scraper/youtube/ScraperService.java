@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -36,13 +37,16 @@ public class ScraperService {
         this.kafkaTopic = kafkaTopic;
     }
 
-    public void run() {
+    /**
+     * @param seed
+     */
+    public void run(String seed) {
         System.setProperty("webdriver.chrome.driver", new File("C:\\local\\workspaces\\nodyes/chromedriver.exe").getAbsolutePath());
         driver = new ChromeDriver();
         js = (JavascriptExecutor) driver;
         vars = new HashMap<String, Object>();
         wait = new WebDriverWait(driver, 40);
-        this.scrape();
+        this.scrape(seed);
 
     }
 
@@ -62,9 +66,9 @@ public class ScraperService {
     }
 
     /**
-     *
+     * @param seed
      */
-    private void scrape() {
+    private void scrape(String seed) {
         openUrlAndConfirmCookiesPolicy();
         driver.findElement(By.name("search_query")).click();
 
@@ -78,7 +82,7 @@ public class ScraperService {
             Actions builder = new Actions(driver);
             builder.moveToElement(element, 0, 0).perform();
         }
-        driver.findElement(By.name("search_query")).sendKeys("michael jackson");
+        driver.findElement(By.name("search_query")).sendKeys(seed);
         driver.findElement(By.id("container")).click();
         driver.findElement(By.id("search-icon-legacy")).click();
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -86,7 +90,7 @@ public class ScraperService {
         ytdThumbnail.click();
 
         for (int i = 0; i < 10000; i++) {
-            commonExtractData();
+            commonExtractData(i);
         }
 
 
@@ -128,7 +132,7 @@ public class ScraperService {
     /**
      *
      */
-    private void commonExtractData() {
+    private void commonExtractData(int iteration) {
         {
             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[2]/div/div[3]/ytd-watch-next-secondary-results-renderer/div[2]/ytd-compact-video-renderer"), 1));
 
@@ -137,55 +141,25 @@ public class ScraperService {
             for (WebElement webElement : ytdCompactVideoRenderer) {
                 try {
                     Suggestion suggestion = new Suggestion();
-                    List<WebElement> children = webElement.findElements(By.xpath("./child::*"));
                     WebElement thumbnail = webElement.findElement(By.id("thumbnail"));
+                    String href = thumbnail.getAttribute("href");
                     suggestion.setHref(thumbnail.getAttribute("href"));
-                    if (children != null && children.size() > 0) {
-                        String[] lines = children.get(0).getText().split("\\r?\\n");
-                        if (lines != null) {
-                            if (lines.length >= 5) {
-                                /**
-                                 * 4:59
-                                 * Michael Jackson - Beat It (Official Video)
-                                 * Michael Jackson
-                                 * 741 M de vues
-                                 * il y a 10 ans
-                                 */
-                                suggestion.setDuration(lines[0]);
-                                suggestion.setName(lines[1]);
-                                suggestion.setAuthor(lines[2]);
-                                suggestion.setNumberViews(lines[3]);
-                                suggestion.setSince(lines[4]);
-
-                            } else if (lines.length == 4) {
-                                /**
-                                 * Michael Jackson - Beat It (Official Video)
-                                 * Michael Jackson
-                                 * 741 M de vues
-                                 * il y a 10 ans
-                                 */
-                                suggestion.setName(lines[0]);
-                                suggestion.setAuthor(lines[1]);
-                                suggestion.setNumberViews(lines[2]);
-                                suggestion.setSince(lines[3]);
-
-                            }
-                        } else {
-                            suggestion.setText(children.get(0).getText());
-                        }
-                    }
+                    suggestion.setIdExp(href.split("v=")[1]);
+                    suggestion.setIterNumber(iteration);
                     this.send(suggestion);
-
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
 
             }
 
-
         }
         {
-            WebElement ytdThumbnail = driver.findElement(By.xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[2]/div/div[3]/ytd-watch-next-secondary-results-renderer/div[2]/ytd-compact-video-renderer[1]/div[1]/ytd-thumbnail/a"));
+            int min = 1;
+            int max = 5;
+            Random random = new Random();
+            int value = random.nextInt(max + min) + min;
+            WebElement ytdThumbnail = driver.findElement(By.xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[2]/div/div[3]/ytd-watch-next-secondary-results-renderer/div[2]/ytd-compact-video-renderer[" + value + "]/div[1]/ytd-thumbnail/a"));
             ytdThumbnail.click();
         }
     }
