@@ -42,7 +42,8 @@ public class ScraperService {
      * @param seed
      */
     public void run(String seed) {
-        System.setProperty("webdriver.chrome.driver", new File("C:\\local\\workspaces\\nodyes/chromedriver.exe").getAbsolutePath());
+        //System.setProperty("webdriver.chrome.driver", new File("C:\\local\\workspaces\\nodyes/chromedriver.exe").getAbsolutePath());
+        System.setProperty("webdriver.chrome.driver", new File("/Users/mosheborochov/Desktop/work/nodys-bot/src/main/resources/chromedriver").getAbsolutePath());
         driver = new ChromeDriver();
         js = (JavascriptExecutor) driver;
         vars = new HashMap<String, Object>();
@@ -61,7 +62,7 @@ public class ScraperService {
             String json = ow.writeValueAsString(suggestion);
             kafkaProducer.send(kafkaTopic, json);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            //log.error(e.getMessage());
         }
 
     }
@@ -103,32 +104,37 @@ public class ScraperService {
      *
      */
     private void openUrlAndConfirmCookiesPolicy() {
-        driver.get("https://www.youtube.com/");
-        driver.manage().window().setSize(new Dimension(1106, 1004));
-        {
-            WebElement element = driver.findElement(By.cssSelector(".buttons > .style-scope:nth-child(1) #button"));
-            Actions builder = new Actions(driver);
-            builder.moveToElement(element).perform();
-        }
-        {
-            WebElement element = driver.findElement(By.tagName("body"));
-            Actions builder = new Actions(driver);
-            builder.moveToElement(element, 0, 0).perform();
-        }
-        js.executeScript("window.scrollTo(0,10)");
-        driver.findElement(By.cssSelector(".buttons > .style-scope:nth-child(1) #button")).click();
-        List<WebElement> elementName = driver.findElements(By.xpath("//span[text()='Activer']"));
-        if (elementName != null && elementName.size() > 0) {
-            for (WebElement webElement : elementName) {
-                try {
-                    webElement.click();
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                }
+        try {
+            driver.get("https://www.youtube.com/");
+            driver.manage().window().setSize(new Dimension(1106, 1004));
+            {
+                WebElement element = driver.findElement(By.cssSelector(".buttons > .style-scope:nth-child(1) #button"));
+                Actions builder = new Actions(driver);
+                builder.moveToElement(element).perform();
             }
-            driver.findElement(By.xpath("//span[text()='Confirmer']")).click();
+            {
+                WebElement element = driver.findElement(By.tagName("body"));
+                Actions builder = new Actions(driver);
+                builder.moveToElement(element, 0, 0).perform();
+            }
+            js.executeScript("window.scrollTo(0,10)");
+            driver.findElement(By.cssSelector(".buttons > .style-scope:nth-child(1) #button")).click();
+            List<WebElement> elementName = driver.findElements(By.xpath("//span[text()='Activer']"));
+            if (elementName != null && elementName.size() > 0) {
+                for (WebElement webElement : elementName) {
+                    try {
+                        webElement.click();
+                    } catch (Exception e) {
+                        //log.error(e.getMessage());
+                    }
+                }
+                driver.findElement(By.xpath("//span[text()='Confirmer']")).click();
+            }
+            driver.findElement(By.cssSelector("#search-form > #container")).click();
         }
-        driver.findElement(By.cssSelector("#search-form > #container")).click();
+        catch (Exception e) {
+            //log.error(e.getMessage());
+        }
     }
 
     /**
@@ -152,9 +158,8 @@ public class ScraperService {
                     suggestion.setSeed(seed);
                     this.send(suggestion);
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    //log.error(e.getMessage());
                 }
-
             }
 
         }

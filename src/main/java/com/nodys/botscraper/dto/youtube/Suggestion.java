@@ -7,9 +7,13 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 
@@ -29,9 +33,11 @@ public class Suggestion implements Serializable {
     private String channelTitle;
     private String defaultAudioLanguage;
     private String defaultLanguage;
+    @Field(type = FieldType.Text, fielddata = true)
     private String description;
     private String liveBroadcastContent;
-    private DateTime publishedAt;
+    @Field(type = FieldType.Date)
+    private Date publishedAt;
     private String title;
     private String duration;
     private BigInteger commentCount;
@@ -39,6 +45,7 @@ public class Suggestion implements Serializable {
     private BigInteger favoriteCount;
     private BigInteger likeCount;
     private BigInteger viewCount;
+    @Field(type = FieldType.Text, fielddata = true)
     private List<String> listComments;
 
 }

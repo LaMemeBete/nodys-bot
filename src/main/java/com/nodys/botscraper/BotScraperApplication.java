@@ -1,6 +1,7 @@
 package com.nodys.botscraper;
 
 import com.nodys.botscraper.service.scraper.youtube.ScraperService;
+import com.oracle.tools.packager.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

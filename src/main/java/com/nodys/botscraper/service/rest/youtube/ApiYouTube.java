@@ -18,7 +18,9 @@ import java.security.GeneralSecurityException;
 @Service
 public class ApiYouTube {
 
-    private static final String DEVELOPER_KEY = "AIzaSyA6pWWp6RAMRmBtDz70J92ZCfWNU7CbpZw";
+    //private static final String DEVELOPER_KEY = "AIzaSyA6pWWp6RAMRmBtDz70J92ZCfWNU7CbpZw";
+    //private static final String DEVELOPER_KEY = "AIzaSyCO38DT9jldXIiN9TmJRScZuKXYgETB1TU";
+    private static final String DEVELOPER_KEY = "AIzaSyCnwTzINAGSqCVh8Xw4AYDTG3Ii30dlEkg";
     private static final String APPLICATION_NAME = "nodys";
 
 
@@ -65,7 +67,7 @@ public class ApiYouTube {
         YouTube.CommentThreads.List request = youtubeService.commentThreads()
                 .list("snippet,replies");
         return request.setKey(DEVELOPER_KEY)
-                .setVideoId("hDkKyAMAobA")
+                .setVideoId(videoId)
                 .execute();
     }
 }
