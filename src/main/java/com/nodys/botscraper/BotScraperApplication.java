@@ -22,6 +22,6 @@ public class BotScraperApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        scraperService.run(seed);
+        //scraperService.run(seed);
     }
 }

@@ -25,12 +25,29 @@ import java.util.List;
 @Setter
 @Data
 @Document(indexName = "youtube-scraper-analysed-fix")
-public class SuggestionAnalysed extends Suggestion implements Serializable {
+public class SuggestionAnalysed implements Serializable {
 
     @Id
     private String id;
 
     @Field(name = "@timestamp", type = FieldType.Date)
     private Date timestamp = Date.from(Instant.now());
+
+    private Suggestion suggestion;
+
+    @Field(type = FieldType.Text, fielddata = true)
+    private String organ;
+
+    @Field(type = FieldType.Text, fielddata = true)
+    private String per;
+
+    @Field(type = FieldType.Text, fielddata = true)
+    private String misc;
+
+    @Field(type = FieldType.Text, fielddata = true)
+    private String loc;
+
+    @Field(type = FieldType.Text, fielddata = true)
+    private String total;
 
 }
