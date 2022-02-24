@@ -22,6 +22,7 @@ if __name__ == "__main__":
         .appName("KafkaYoutubeScraperSparkStream")\
         .master("local")\
         .getOrCreate()
+    spark.sparkContext.setLogLevel('WARN')
 
     # Read topic from Kafka
     df = spark.readStream\

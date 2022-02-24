@@ -9,6 +9,7 @@ import com.google.api.services.youtube.model.CommentThreadListResponse;
 import com.google.api.services.youtube.model.VideoListResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -17,12 +18,9 @@ import java.security.GeneralSecurityException;
 @Slf4j
 @Service
 public class ApiYouTube {
-
-    //private static final String DEVELOPER_KEY = "AIzaSyA6pWWp6RAMRmBtDz70J92ZCfWNU7CbpZw";
-    //private static final String DEVELOPER_KEY = "AIzaSyCO38DT9jldXIiN9TmJRScZuKXYgETB1TU";
-    private static final String DEVELOPER_KEY = "AIzaSyCnwTzINAGSqCVh8Xw4AYDTG3Ii30dlEkg";
+    @Value(value = "${youtube-api-key}")
+    private String DEVELOPER_KEY;
     private static final String APPLICATION_NAME = "nodys";
-
 
     /**
      * Build and return an authorized API client service.
